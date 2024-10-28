@@ -1,3 +1,44 @@
+services:
+  traefik:
+    container_name: ${TRAEFIK_SUBDOMAIN}
+    image: "traefik:latest"
+    profiles:
+      - dependencies
+    networks:
+      pterodactyl_nw:
+        ipv4_address: 172.21.0.5
+    <<: *basics
+    labels:
+      # General Traefik Configuration
+      - "traefik.enable=true"
+      - "traefik.http.routers.api.rule=Host(`${TRAEFIK_SUBDOMAIN}.${ROOT_DOMAIN}`)"
+      - "traefik.http.routers.api.service=api@internal"
+      - "traefik.http.routers.api.entrypoints=websecure"
+      - "traefik.http.routers.api.tls=true"
+      - "traefik.http.routers.api.tls.certresolver=sslresolver"
+
+    command:
+      - "--api=true"
+      - "--api.insecure=true"
+      - "--accesslog=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
+      - "--certificatesresolvers.sslresolver.acme.tlschallenge=true"
+      - "--certificatesresolvers.sslresolver.acme.email=${SSL_EMAIL}"
+      - "--certificatesresolvers.sslresolver.acme.storage=/letsencrypt/acme.json"
+      # Uncomment for staging.
+      - "--certificatesresolvers.sslresolver.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ../certificates:/letsencrypt
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
 networks:
   pterodactyl_nw:
     name: pterodactyl_nw
