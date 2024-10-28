@@ -7,8 +7,7 @@ services:
   traefik:
     container_name: ${TRAEFIK_SUBDOMAIN}
     image: "traefik:latest"
-    profiles:
-      - dependencies
+
     networks:
       pterodactyl_nw:
         ipv4_address: 172.21.0.5
