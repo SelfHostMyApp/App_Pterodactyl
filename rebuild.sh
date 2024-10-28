@@ -1,4 +1,4 @@
-docker compose down --profile dependencies
+docker compose down
 if [ ! -f ./.env ]; then
     cp ./.env.example ./.env
 fi
