@@ -1,0 +1,10 @@
+networks:
+  pterodactyl_nw:
+    name: pterodactyl_nw
+    driver: bridge
+    enable_ipv6: true
+    ipam:
+      driver: default
+      config:
+        - subnet: "172.21.0.0/16"
+          gateway: "172.21.0.1"
