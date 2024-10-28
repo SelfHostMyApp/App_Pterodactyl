@@ -1,0 +1,191 @@
+x-basics: &basics
+  env_file:
+    - .env
+  restart: unless-stopped
+
+services:
+  traefik:
+    container_name: ${TRAEFIK_SUBDOMAIN}
+    image: "traefik:latest"
+    profiles:
+      - dependencies
+    networks:
+      games:
+        ipv4_address: 172.21.0.5
+    <<: *basics
+    labels:
+      # General Traefik Configuration
+      - "traefik.enable=true"
+      - "traefik.http.routers.api.rule=Host(`${TRAEFIK_SUBDOMAIN}.${ROOT_DOMAIN}`)"
+      - "traefik.http.routers.api.service=api@internal"
+      - "traefik.http.routers.api.entrypoints=websecure"
+      - "traefik.http.routers.api.tls=true"
+      - "traefik.http.routers.api.tls.certresolver=sslresolver"
+
+    command:
+      - "--api=true"
+      - "--api.insecure=true"
+      - "--accesslog=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
+      - "--certificatesresolvers.sslresolver.acme.tlschallenge=true"
+      - "--certificatesresolvers.sslresolver.acme.email=${SSL_EMAIL}"
+      - "--certificatesresolvers.sslresolver.acme.storage=/letsencrypt/acme.json"
+      # Uncomment for staging.
+      - "--certificatesresolvers.sslresolver.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ../certificates:/letsencrypt
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
+  maria-db:
+    container_name: db-maria
+    image: mariadb:latest
+    <<: *basics
+    profiles:
+      - dependencies
+    networks:
+      games:
+        ipv4_address: 172.21.0.6
+    environment:
+      - MARIADB_ROOT_HOST=%
+      - MARIADB_ROOT_PASSWORD=${ROOT_PASSWORD}
+      - MARIADB_DATABASE=pterodactyl
+      - MARIADB_USER=pterodactyl
+      - MARIADB_PASSWORD=${PTERODACTYL_PASSWORD}
+    # ports:
+    # - 5436:3306
+    volumes:
+      - ~/volumes/database/maria/data:/var/lib/mysql
+      - ~/volumes/database/maria/init:/docker-entrypoint-initdb.d
+      - ~/volumes/database/maria/custom.cnf:/etc/mysql/conf.d/custom.cnf:ro
+      - ../init_scripts/mariadb-init.sh:/docker-entrypoint-initdb.d/mysql-init.sh
+    command:
+      [
+        "--log-bin=mysqld-bin",
+        "--max-connections=1000",
+        "--wait-timeout=28800",
+        "--bind-address=0.0.0.0",
+      ]
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          'mariadb -h localhost -u root -p"${ROOT_PASSWORD}" -e "SELECT 1;"',
+        ]
+      start_period: 90s
+      retries: 10
+      timeout: 15s
+
+  redis:
+    image: "redis:latest"
+    container_name: db-memory
+    <<: *basics
+    profiles:
+      - dependencies
+    command: redis-server --appendonly yes --replica-read-only no
+    networks:
+      games:
+        ipv4_address: 172.21.0.9
+    volumes:
+      - "~/volumes/redis/data:/data"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      retries: 3
+      timeout: 5s
+
+  # TODO Automate `php artisan p:user:mak`
+  pterodactyl:
+    image: ghcr.io/pterodactyl/panel:v1.11.7
+    container_name: ${PTERODACTYL_SUBDOMAIN}
+    <<: *basics
+    networks:
+      games:
+        ipv4_address: 172.21.0.4
+    environment:
+      - DB_HOST=maria-db
+      - DB_PORT=3306
+      - DB_USERNAME=pterodactyl
+      - DB_PASSWORD=${PTERODACTYL_PASSWORD}
+      - DB_DATABASE=pterodactyl
+      - APP_URL=http://${PTERODACTYL_SUBDOMAIN}.${ROOT_DOMAIN}
+      - APP_KEY=base64:ApE2v9xK5J6c0ugQ/bmY/wWbpZgMWGh2cppE53iLxvQ=
+      - APP_TIMEZONE=${TZ}
+      - CACHE_DRIVER=redis
+      - SESSION_DRIVER=redis
+      - QUEUE_DRIVER=redis
+      - REDIS_HOST=redis
+      - APP_ENV=local
+      - APP_ENVIRONMENT_ONLY=false
+      - LOG_LEVEL=debug
+      - LOG_CHANNEL=stderr
+      - APP_DEBUG=true
+      - APP_LOG_LEVEL=debug
+      - PHP_DISPLAY_ERRORS=1
+      - PHP_DISPLAY_STARTUP_ERRORS=1
+      - PHP_ERROR_REPORTING=E_ALL
+    volumes:
+      - ~/games/panel/data:/var/www/pterodactyl
+      - ~/games/panel/config:/app/var
+      # - ~/games/panel/logs:/app/storage/logs
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.pterodactyl.rule=Host(`${PTERODACTYL_SUBDOMAIN}.${ROOT_DOMAIN}`)"
+      - "traefik.http.routers.pterodactyl.entrypoints=web"
+      - "traefik.http.routers.pterodactyl.service=pterodactyl"
+      - "traefik.http.routers.pterodactyl.tls=true"
+      - "traefik.http.routers.pterodactyl.tls.certresolver=sslresolver"
+      - "traefik.http.services.pterodactyl.loadbalancer.server.port=80"
+    depends_on:
+      - maria-db
+      - redis
+  pterodactyl-wings:
+    image: ghcr.io/pterodactyl/wings:v1.11.13
+    container_name: ${PTERODACTYL_SUBDOMAIN}-daemon
+    <<: *basics
+    volumes:
+      - ../games/config/pterodactyl:/etc/pterodactyl
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "/var/lib/docker/containers/:/var/lib/docker/containers/"
+      - "/var/lib/pterodactyl/:/var/lib/pterodactyl/"
+      - "/var/log/pterodactyl/:/var/log/pterodactyl/"
+      - "/tmp/pterodactyl/:/tmp/pterodactyl/"
+      - "/etc/ssl/certs:/etc/ssl/certs:ro"
+    privileged: true
+    environment:
+      TZ: ${TZ}
+      WINGS_UID: 988
+      WINGS_GID: 988
+      WINGS_USERNAME: pterodactyl
+    tty: true
+    # labels:
+    #   - "traefik.enable=true"
+    #   - "traefik.http.routers.pterodactylwings.rule=Host(`daemon.${PTERODACTYL_SUBDOMAIN}.${ROOT_DOMAIN}`)"
+    #   - "traefik.http.routers.pterodactylwings.entrypoints=websecure"
+    #   - "traefik.http.routers.pterodactylwings.service=pterodactylwings"
+    #   - "traefik.http.routers.pterodactylwings.tls=true"
+    #   - "traefik.http.routers.pterodactylwings.tls.certresolver=sslresolver"
+    #   - "traefik.http.services.pterodactylwings.loadbalancer.server.port=8080"
+    ports:
+      - "8080:8080"
+      - "2022:2022"
+    networks:
+      games:
+        ipv4_address: 172.21.0.3
+
+networks:
+  games:
+    driver: bridge
+    name: pterodactyl_nw
+    enable_ipv6: true
+    ipam:
+      driver: default
+      config:
+        - subnet: "172.21.0.0/16"
+          gateway: "172.21.0.1"

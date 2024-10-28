@@ -1,0 +1,25 @@
+debug: true
+uuid: 468695b0-d8d8-4a37-bc87-b54122e7c96c
+token_id: 4Z8loPV9Tc8VYLI7
+token: 3BKHCibZLweW0YkQIVWcfk8fJnRywVHIC6bj2jvQEQCapgzWn1UM0rbhMMKAz1LC
+api:
+  host: 0.0.0.0
+  port: 8080
+  ssl:
+    enabled: false
+  upload_limit: 100
+system:
+  data: /var/lib/pterodactyl/volumes
+  sftp:
+    bind_port: 2022
+allowed_mounts: []
+remote: 'http://games.bodenresearch.com'
+# docker:
+#   network:
+#     interface: 0.0.0.0
+#     driver: bridge
+#     is_internal: false
+#     enable_icc: true
+#     subnet: 172.21.0.0/16
+#     gateway: 172.21.0.1
+#     ip_range: 172.21.1.0/24
