@@ -10,7 +10,7 @@ services:
     profiles:
       - dependencies
     networks:
-      games:
+      pterodactyl_nw:
         ipv4_address: 172.21.0.5
     <<: *basics
     labels:
@@ -51,7 +51,7 @@ services:
     profiles:
       - dependencies
     networks:
-      games:
+      pterodactyl_nw:
         ipv4_address: 172.21.0.6
     environment:
       - MARIADB_ROOT_HOST=%
@@ -91,7 +91,7 @@ services:
       - dependencies
     command: redis-server --appendonly yes --replica-read-only no
     networks:
-      games:
+      pterodactyl_nw:
         ipv4_address: 172.21.0.9
     volumes:
       - "~/volumes/redis/data:/data"
@@ -106,7 +106,7 @@ services:
     container_name: ${PTERODACTYL_SUBDOMAIN}
     <<: *basics
     networks:
-      games:
+      pterodactyl_nw:
         ipv4_address: 172.21.0.4
     environment:
       - DB_HOST=maria-db
@@ -176,7 +176,7 @@ services:
       - "8080:8080"
       - "2022:2022"
     networks:
-      games:
+      pterodactyl_nw:
         ipv4_address: 172.21.0.3
 
 networks:
