@@ -1,3 +1,8 @@
+x-basics: &basics
+  env_file:
+    - .env
+  restart: unless-stopped
+
 services:
   traefik:
     container_name: ${TRAEFIK_SUBDOMAIN}
