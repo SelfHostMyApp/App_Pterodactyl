@@ -180,12 +180,5 @@ services:
         ipv4_address: 172.21.0.3
 
 networks:
-  games:
-    driver: bridge
-    name: pterodactyl_nw
-    enable_ipv6: true
-    ipam:
-      driver: default
-      config:
-        - subnet: "172.21.0.0/16"
-          gateway: "172.21.0.1"
+  pterodactyl_nw:
+    external: true
