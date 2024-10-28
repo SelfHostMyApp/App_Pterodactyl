@@ -142,9 +142,9 @@ services:
       - "traefik.http.routers.pterodactyl.tls=true"
       - "traefik.http.routers.pterodactyl.tls.certresolver=sslresolver"
       - "traefik.http.services.pterodactyl.loadbalancer.server.port=80"
-    depends_on:
-      - maria-db
-      - redis
+    # depends_on:
+    #   - maria-db
+    #   - redis
   pterodactyl-wings:
     image: ghcr.io/pterodactyl/wings:v1.11.13
     container_name: ${PTERODACTYL_SUBDOMAIN}-daemon
