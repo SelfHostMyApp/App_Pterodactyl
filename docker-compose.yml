@@ -62,7 +62,8 @@ services:
 
   # TODO Automate `php artisan p:user:mak`
   pterodactyl:
-    image: ghcr.io/pterodactyl/panel:v1.11.7
+    # image: ghcr.io/pterodactyl/panel:v1.11.7
+    image: ghcr.io/pterodactyl/panel:latest
     container_name: ${PTERODACTYL_SUBDOMAIN}
     <<: *basics
     networks:
@@ -106,7 +107,8 @@ services:
       - maria-db
       - redis
   pterodactyl-wings:
-    image: ghcr.io/pterodactyl/wings:v1.11.13
+    # image: ghcr.io/pterodactyl/wings:v1.11.13
+    image: ghcr.io/pterodactyl/wings:latest
     container_name: ${PTERODACTYL_SUBDOMAIN}-daemon
     <<: *basics
     volumes:
