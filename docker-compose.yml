@@ -132,7 +132,7 @@ services:
       - "traefik.http.routers.pterodactylwings.rule=Host(`daemon.${PTERODACTYL_SUBDOMAIN}.${ROOT_DOMAIN}`)"
       - "traefik.http.routers.pterodactylwings.entrypoints=websecure"
       - "traefik.http.routers.pterodactylwings.service=pterodactylwings"
-      - "traefik.http.routers.pterodactylwings.tls=false"
+      - "traefik.http.routers.pterodactylwings.tls=true"
       - "traefik.http.routers.pterodactylwings.tls.certresolver=sslresolver"
       - "traefik.http.services.pterodactylwings.loadbalancer.server.port=8080"
     ports:
