@@ -28,8 +28,8 @@ if [ -z "$key" ] || [ "$key" = "null" ]; then
 fi
 
 # Ensure certificate and key have proper headers and footers
-cert="-----BEGIN CERTIFICATE-----\n$(echo "$cert" | fold -w 64)\n-----END CERTIFICATE-----"
-key="-----BEGIN PRIVATE KEY-----\n$(echo "$key" | fold -w 64)\n-----END PRIVATE KEY-----"
+cert="-----BEGIN CERTIFICATE-----\\n$(echo "$cert" | fold -w 64)\\n-----END CERTIFICATE-----"
+key="-----BEGIN PRIVATE KEY-----\\n$(echo "$key" | fold -w 64)\\n-----END PRIVATE KEY-----"
 # Debug: Print extracted values
 echo "Extracted certificate: $cert"
 echo "\n"
