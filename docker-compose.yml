@@ -4,8 +4,8 @@ x-basics: &basics
   restart: unless-stopped
 
 services:
-  maria-db:
-    container_name: db-maria
+  pterodactyl-maria-db:
+    container_name: ${PTERODACTYL_SUBDOMAIN}-db-maria
     image: mariadb:latest
     <<: *basics
     profiles:
@@ -43,9 +43,9 @@ services:
       retries: 10
       timeout: 15s
 
-  redis:
+  pterodactyl-redis:
     image: "redis:latest"
-    container_name: db-memory
+    container_name: ${PTERODACTYL_SUBDOMAIN}-db-memory
     <<: *basics
     profiles:
       - dependencies
@@ -69,7 +69,7 @@ services:
       pterodactyl_nw:
         ipv4_address: 172.21.0.4
     environment:
-      - DB_HOST=maria-db
+      - DB_HOST=${PTERODACTYL_SUBDOMAIN}-db-maria
       - DB_PORT=3306
       - DB_USERNAME=pterodactyl
       - DB_PASSWORD=${PTERODACTYL_PASSWORD}
@@ -80,7 +80,7 @@ services:
       - CACHE_DRIVER=redis
       - SESSION_DRIVER=redis
       - QUEUE_DRIVER=redis
-      - REDIS_HOST=redis
+      - REDIS_HOST=${PTERODACTYL_SUBDOMAIN}-db-memory
       - APP_ENV=local
       - APP_ENVIRONMENT_ONLY=false
       - LOG_LEVEL=debug
