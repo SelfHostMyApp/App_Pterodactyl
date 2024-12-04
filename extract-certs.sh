@@ -45,13 +45,9 @@ if [ -z "$key" ] || [ "$key" = "null" ]; then
 fi
 
 # Decode the certificate and key from base64 and format them as PEM
-echo "-----BEGIN CERTIFICATE-----" >/tmp/fullchain.pem
 echo "$cert" | $CMD_DECODE_BASE64 >>/tmp/fullchain.pem
-echo "-----END CERTIFICATE-----" >>/tmp/fullchain.pem
 
-echo "-----BEGIN PRIVATE KEY-----" >/tmp/privkey.pem
 echo "$key" | $CMD_DECODE_BASE64 >>/tmp/privkey.pem
-echo "-----END PRIVATE KEY-----" >>/tmp/privkey.pem
 
 # Debug: Print extracted and formatted certificate and key
 echo "Extracted certificate and key formatted as PEM"
