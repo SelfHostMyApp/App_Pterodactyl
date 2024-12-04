@@ -28,13 +28,16 @@ if [ -z "$key" ] || [ "$key" = "null" ]; then
 fi
 
 # Write certificate and key to files
+echo "-----BEGIN CERTIFICATE-----" >config/daemon/certs/fullchain.pem
 echo "$cert" >config/daemon/certs/fullchain.pem
+echo "-----END CERTIFICATE-----" >>config/daemon/certs/fullchain.pem
 if [ $? -ne 0 ]; then
     echo "Error writing certificate to file"
     exit 1
 fi
-
+echo "-----BEGIN PRIVATE KEY-----" >config/daemon/certs/privkey.pem
 echo "$key" >config/daemon/certs/privkey.pem
+echo "-----END PRIVATE KEY-----" >>config/daemon/certs/privkey.pem
 if [ $? -ne 0 ]; then
     echo "Error writing private key to file"
     exit 1

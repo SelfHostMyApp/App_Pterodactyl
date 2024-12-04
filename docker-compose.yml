@@ -119,6 +119,8 @@ services:
       - "/tmp/pterodactyl/:/tmp/pterodactyl/"
       - "/etc/ssl/certs:/etc/ssl/certs:ro"
     privileged: true
+    depends_on:
+      - pterodactyl
     environment:
       TZ: ${TZ}
       WINGS_UID: 988
