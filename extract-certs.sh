@@ -13,8 +13,8 @@ SUBDOMAIN="$2"
 mkdir -p certs
 
 # Verbose extraction with error checking
-cert=$(sudo jq -r --arg domain "$SUBDOMAIN" '.[] | select(.domain.main == $domain) | .certificate' "$ACME_JSON_PATH")
-key=$(sudo jq -r --arg domain "$SUBDOMAIN" '.[] | select(.domain.main == $domain) | .key' "$ACME_JSON_PATH")
+cert=$(sudo jq -r --arg domain "$SUBDOMAIN" '.[] | select(.sslresolver.Certificates[]?.domain.main == $domain) | .certificate' "$ACME_JSON_PATH")
+key=$(sudo jq -r --arg domain "$SUBDOMAIN" '.[] | select(.sslresolver.Certificates[]?.domain.main == $domain) | .key' "$ACME_JSON_PATH")
 
 # Check if certificate or key is empty or null
 if [ -z "$cert" ] || [ "$cert" = "null" ]; then
