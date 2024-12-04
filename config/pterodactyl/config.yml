@@ -13,7 +13,7 @@ system:
   sftp:
     bind_port: 2022
 allowed_mounts: []
-remote: 'http://games.bodenresearch.com'
+remote: 'http://games.jamesonrgrive.ca'
 # docker:
 #   network:
 #     interface: 0.0.0.0

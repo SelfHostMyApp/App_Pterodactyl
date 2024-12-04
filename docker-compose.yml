@@ -97,11 +97,11 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.pterodactyl.rule=Host(`${PTERODACTYL_SUBDOMAIN}.${ROOT_DOMAIN}`)"
-      - "traefik.http.routers.pterodactyl.entrypoints=web"
+      - "traefik.http.routers.pterodactyl.entrypoints=websecure"
       - "traefik.http.routers.pterodactyl.service=pterodactyl"
       - "traefik.http.routers.pterodactyl.tls=true"
       - "traefik.http.routers.pterodactyl.tls.certresolver=sslresolver"
-      - "traefik.http.services.pterodactyl.loadbalancer.server.port=80"
+      - "traefik.http.services.pterodactyl.loadbalancer.server.port=443"
     depends_on:
       - maria-db
       - redis
