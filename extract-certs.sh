@@ -12,9 +12,9 @@ SUBDOMAIN="$2"
 # Create output directory if it doesn't exist
 mkdir -p certs
 
-# Verbose extraction with error checking
-cert=$(sudo jq -r --arg domain "$SUBDOMAIN" '.[] | select(.sslresolver.Certificates[]?.domain.main == $domain) | .certificate' "$ACME_JSON_PATH")
-key=$(sudo jq -r --arg domain "$SUBDOMAIN" '.[] | select(.sslresolver.Certificates[]?.domain.main == $domain) | .key' "$ACME_JSON_PATH")
+# Extract certificate and key
+cert=$(sudo jq -r --arg domain "$SUBDOMAIN" '.sslresolver.Certificates[] | select(.domain.main == $domain) | .certificate' "$ACME_JSON_PATH")
+key=$(sudo jq -r --arg domain "$SUBDOMAIN" '.sslresolver.Certificates[] | select(.domain.main == $domain) | .key' "$ACME_JSON_PATH")
 
 # Check if certificate or key is empty or null
 if [ -z "$cert" ] || [ "$cert" = "null" ]; then
@@ -27,16 +27,16 @@ if [ -z "$key" ] || [ "$key" = "null" ]; then
     exit 1
 fi
 
-# Decode and write with verbose error checking
-echo "$cert" | base64 -d >certs/fullchain.pem
+# Write certificate and key to files
+echo "$cert" >certs/fullchain.pem
 if [ $? -ne 0 ]; then
-    echo "Error decoding certificate"
+    echo "Error writing certificate to file"
     exit 1
 fi
 
-echo "$key" | base64 -d >certs/privkey.pem
+echo "$key" >certs/privkey.pem
 if [ $? -ne 0 ]; then
-    echo "Error decoding private key"
+    echo "Error writing private key to file"
     exit 1
 fi
 
