@@ -27,29 +27,66 @@ if [ -z "$key" ] || [ "$key" = "null" ]; then
     exit 1
 fi
 
-# Write certificate and key to files
-echo "-----BEGIN CERTIFICATE-----" >config/daemon/certs/fullchain.pem
-echo "$cert" >config/daemon/certs/fullchain.pem
-echo "-----END CERTIFICATE-----" >>config/daemon/certs/fullchain.pem
+# Ensure certificate and key have proper headers and footers
+cert="-----BEGIN CERTIFICATE-----\n$cert\n-----END CERTIFICATE-----"
+key="-----BEGIN PRIVATE KEY-----\n$key\n-----END PRIVATE KEY-----"
+
+# Write certificate and key to temporary files for validation
+echo "$cert" >/tmp/fullchain.pem
+echo "$key" >/tmp/privkey.pem
+
+# Set appropriate permissions
+chmod 600 /tmp/fullchain.pem /tmp/privkey.pem
+
+# Validate certificate and private key
+openssl x509 -in /tmp/fullchain.pem -noout >/dev/null 2>&1
 if [ $? -ne 0 ]; then
-    echo "Error writing certificate to file"
-    exit 1
-fi
-echo "-----BEGIN PRIVATE KEY-----" >config/daemon/certs/privkey.pem
-echo "$key" >config/daemon/certs/privkey.pem
-echo "-----END PRIVATE KEY-----" >>config/daemon/certs/privkey.pem
-if [ $? -ne 0 ]; then
-    echo "Error writing private key to file"
+    echo "Error: Invalid certificate format"
+    rm -f /tmp/fullchain.pem /tmp/privkey.pem
     exit 1
 fi
 
-# Verify file contents
+openssl rsa -in /tmp/privkey.pem -check -noout >/dev/null 2>&1
+if [ $? -ne 0 ]; then
+    echo "Error: Invalid private key format"
+    rm -f /tmp/fullchain.pem /tmp/privkey.pem
+    exit 1
+fi
+
+# Ensure the certificate and key match
+openssl x509 -noout -modulus -in /tmp/fullchain.pem | openssl md5 >/tmp/cert_modulus
+openssl rsa -noout -modulus -in /tmp/privkey.pem | openssl md5 >/tmp/key_modulus
+if ! diff /tmp/cert_modulus /tmp/key_modulus >/dev/null; then
+    echo "Error: Certificate and private key do not match"
+    rm -f /tmp/fullchain.pem /tmp/privkey.pem /tmp/cert_modulus /tmp/key_modulus
+    exit 1
+fi
+
+# Clean up temporary files
+rm -f /tmp/cert_modulus /tmp/key_modulus
+
+# Write validated certificate and key to files
+echo "$cert" >config/daemon/certs/fullchain.pem
+echo "$key" >config/daemon/certs/privkey.pem
+if [ $? -ne 0 ]; then
+    echo "Error writing files"
+    rm -f /tmp/fullchain.pem /tmp/privkey.pem
+    exit 1
+fi
+
+# Set appropriate permissions on final files
+chmod 600 config/daemon/certs/fullchain.pem config/daemon/certs/privkey.pem
+
+# Verify final file contents
 if [ ! -s config/daemon/certs/fullchain.pem ] || [ ! -s config/daemon/certs/privkey.pem ]; then
     echo "Warning: Generated files are empty"
     exit 1
 fi
 
-echo "Certificates extracted for $SUBDOMAIN:"
+# Clean up temporary files
+rm -f /tmp/fullchain.pem /tmp/privkey.pem
+
+echo "Certificates extracted and validated for $SUBDOMAIN:"
 echo "- Full chain certificate: config/daemon/certs/fullchain.pem"
 echo "- Private key: config/daemon/certs/privkey.pem"
 
