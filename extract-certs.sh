@@ -26,10 +26,10 @@ if [ -z "$key" ] || [ "$key" = "null" ]; then
     echo "Error: No private key found for $SUBDOMAIN"
     exit 1
 fi
-
+newline = $'\n'
 # Ensure certificate and key have proper headers and footers
-cert="-----BEGIN CERTIFICATE-----\\n$(echo "$cert" | fold -w 64)\\n-----END CERTIFICATE-----"
-key="-----BEGIN PRIVATE KEY-----\\n$(echo "$key" | fold -w 64)\\n-----END PRIVATE KEY-----"
+cert="-----BEGIN CERTIFICATE-----$newline$(echo "$cert" | fold -w 64)$newline-----END CERTIFICATE-----"
+key="-----BEGIN PRIVATE KEY-----$newline$(echo "$key" | fold -w 64)$newline-----END PRIVATE KEY-----"
 # Debug: Print extracted values
 echo "Extracted certificate: $cert"
 echo "\n"
