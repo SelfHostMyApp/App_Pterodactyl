@@ -13,10 +13,10 @@ SUBDOMAIN="$2"
 mkdir -p certs
 
 # Extract and write fullchain certificate
-jq -r --arg domain "$SUBDOMAIN" '.[] | select(.domain.main == $domain) | .certificate' "$ACME_JSON_PATH" | base64 -d >certs/fullchain.pem
+sudo jq -r --arg domain "$SUBDOMAIN" '.[] | select(.domain.main == $domain) | .certificate' "$ACME_JSON_PATH" | base64 -d >certs/fullchain.pem
 
 # Extract and write private key
-jq -r --arg domain "$SUBDOMAIN" '.[] | select(.domain.main == $domain) | .key' "$ACME_JSON_PATH" | base64 -d >certs/privkey.pem
+sudo jq -r --arg domain "$SUBDOMAIN" '.[] | select(.domain.main == $domain) | .key' "$ACME_JSON_PATH" | base64 -d >certs/privkey.pem
 
 echo "Certificates extracted for $SUBDOMAIN:"
 echo "- Full chain certificate: certs/fullchain.pem"
