@@ -101,7 +101,7 @@ services:
       - "traefik.http.routers.pterodactyl.service=pterodactyl"
       - "traefik.http.routers.pterodactyl.tls=true"
       - "traefik.http.routers.pterodactyl.tls.certresolver=sslresolver"
-      - "traefik.http.services.pterodactyl.loadbalancer.server.port=443"
+      - "traefik.http.services.pterodactyl.loadbalancer.server.port=80"
     depends_on:
       - maria-db
       - redis
