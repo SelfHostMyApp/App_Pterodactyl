@@ -16,6 +16,10 @@ mkdir -p config/daemon/certs
 cert=$(sudo jq -r --arg domain "$SUBDOMAIN" '.sslresolver.Certificates[] | select(.domain.main == $domain) | .certificate' "$ACME_JSON_PATH")
 key=$(sudo jq -r --arg domain "$SUBDOMAIN" '.sslresolver.Certificates[] | select(.domain.main == $domain) | .key' "$ACME_JSON_PATH")
 
+# Debug: Print extracted values
+echo "Extracted certificate: $cert"
+echo "Extracted key: $key"
+
 # Check if certificate or key is empty or null
 if [ -z "$cert" ] || [ "$cert" = "null" ]; then
     echo "Error: No certificate found for $SUBDOMAIN"
@@ -28,8 +32,8 @@ if [ -z "$key" ] || [ "$key" = "null" ]; then
 fi
 
 # Ensure certificate and key have proper headers and footers
-cert="-----BEGIN CERTIFICATE-----\n$cert\n-----END CERTIFICATE-----"
-key="-----BEGIN PRIVATE KEY-----\n$key\n-----END PRIVATE KEY-----"
+cert="-----BEGIN CERTIFICATE-----\n$(echo "$cert" | fold -w 64)\n-----END CERTIFICATE-----"
+key="-----BEGIN PRIVATE KEY-----\n$(echo "$key" | fold -w 64)\n-----END PRIVATE KEY-----"
 
 # Write certificate and key to temporary files for validation
 echo "$cert" >/tmp/fullchain.pem
