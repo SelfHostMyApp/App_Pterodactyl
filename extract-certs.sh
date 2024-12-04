@@ -12,9 +12,26 @@ SUBDOMAIN="$2"
 # Create output directory if it doesn't exist
 mkdir -p config/daemon/certs
 
-# Extract certificate and key
-cert=$(sudo jq -r --arg domain "$SUBDOMAIN" '.sslresolver.Certificates[] | select(.domain.main == $domain) | .certificate' "$ACME_JSON_PATH")
-key=$(sudo jq -r --arg domain "$SUBDOMAIN" '.sslresolver.Certificates[] | select(.domain.main == $domain) | .key' "$ACME_JSON_PATH")
+# Platform-specific base64 decoding command
+case "$(uname)" in
+'Linux')
+    CMD_DECODE_BASE64="base64 -d"
+    ;;
+*)
+    CMD_DECODE_BASE64="base64 --decode"
+    ;;
+esac
+
+# Extract certificate and key using jq
+cert=$(jq -e -r --arg domain "$SUBDOMAIN" '.sslresolver.Certificates[] | select(.domain.main == $domain) | .certificate' "$ACME_JSON_PATH") || {
+    echo "Error: Failed to extract certificate from $ACME_JSON_PATH"
+    exit 2
+}
+
+key=$(jq -e -r --arg domain "$SUBDOMAIN" '.sslresolver.Certificates[] | select(.domain.main == $domain) | .key' "$ACME_JSON_PATH") || {
+    echo "Error: Failed to extract private key from $ACME_JSON_PATH"
+    exit 2
+}
 
 # Check if certificate or key is empty or null
 if [ -z "$cert" ] || [ "$cert" = "null" ]; then
@@ -26,23 +43,25 @@ if [ -z "$key" ] || [ "$key" = "null" ]; then
     echo "Error: No private key found for $SUBDOMAIN"
     exit 1
 fi
-newline = $'\n'
-# Ensure certificate and key have proper headers and footers
-cert="-----BEGIN CERTIFICATE-----$newline$(echo "$cert" | fold -w 64)$newline-----END CERTIFICATE-----"
-key="-----BEGIN PRIVATE KEY-----$newline$(echo "$key" | fold -w 64)$newline-----END PRIVATE KEY-----"
-# Debug: Print extracted values
-echo "Extracted certificate: $cert"
-echo "\n"
-echo "Extracted key: $key"
 
-# Write certificate and key to temporary files for validation
-echo "$cert" >/tmp/fullchain.pem
-echo "$key" >/tmp/privkey.pem
+# Decode the certificate and key from base64 and format them as PEM
+echo "-----BEGIN CERTIFICATE-----" >/tmp/fullchain.pem
+echo "$cert" | $CMD_DECODE_BASE64 >>/tmp/fullchain.pem
+echo "-----END CERTIFICATE-----" >>/tmp/fullchain.pem
+
+echo "-----BEGIN PRIVATE KEY-----" >/tmp/privkey.pem
+echo "$key" | $CMD_DECODE_BASE64 >>/tmp/privkey.pem
+echo "-----END PRIVATE KEY-----" >>/tmp/privkey.pem
+
+# Debug: Print extracted and formatted certificate and key
+echo "Extracted certificate and key formatted as PEM"
+cat /tmp/fullchain.pem
+cat /tmp/privkey.pem
 
 # Set appropriate permissions
 chmod 600 /tmp/fullchain.pem /tmp/privkey.pem
 
-# Validate certificate and private key
+# Validate certificate and private key formats
 openssl x509 -in /tmp/fullchain.pem -noout >/dev/null 2>&1
 if [ $? -ne 0 ]; then
     echo "Error: Invalid certificate format"
@@ -69,14 +88,9 @@ fi
 # Clean up temporary files
 rm -f /tmp/cert_modulus /tmp/key_modulus
 
-# Write validated certificate and key to files
-echo "$cert" >config/daemon/certs/fullchain.pem
-echo "$key" >config/daemon/certs/privkey.pem
-if [ $? -ne 0 ]; then
-    echo "Error writing files"
-    rm -f /tmp/fullchain.pem /tmp/privkey.pem
-    exit 1
-fi
+# Move validated certificate and key to the final location
+mv /tmp/fullchain.pem config/daemon/certs/fullchain.pem
+mv /tmp/privkey.pem config/daemon/certs/privkey.pem
 
 # Set appropriate permissions on final files
 chmod 600 config/daemon/certs/fullchain.pem config/daemon/certs/privkey.pem
@@ -86,9 +100,6 @@ if [ ! -s config/daemon/certs/fullchain.pem ] || [ ! -s config/daemon/certs/priv
     echo "Warning: Generated files are empty"
     exit 1
 fi
-
-# Clean up temporary files
-rm -f /tmp/fullchain.pem /tmp/privkey.pem
 
 echo "Certificates extracted and validated for $SUBDOMAIN:"
 echo "- Full chain certificate: config/daemon/certs/fullchain.pem"
