@@ -110,6 +110,7 @@ services:
     container_name: ${PTERODACTYL_SUBDOMAIN}-daemon
     <<: *basics
     volumes:
+      - ../games/config/daemon/certs:/etc/letsencrypt/live/daemon.${PTERODACTYL_SUBDOMAIN}.${ROOT_DOMAIN}
       - ../games/config/pterodactyl:/etc/pterodactyl
       - "/var/run/docker.sock:/var/run/docker.sock"
       - "/var/lib/docker/containers/:/var/lib/docker/containers/"

@@ -10,7 +10,7 @@ ACME_JSON_PATH="$1"
 SUBDOMAIN="$2"
 
 # Create output directory if it doesn't exist
-mkdir -p certs
+mkdir -p config/daemon/certs
 
 # Extract certificate and key
 cert=$(sudo jq -r --arg domain "$SUBDOMAIN" '.sslresolver.Certificates[] | select(.domain.main == $domain) | .certificate' "$ACME_JSON_PATH")
@@ -28,27 +28,27 @@ if [ -z "$key" ] || [ "$key" = "null" ]; then
 fi
 
 # Write certificate and key to files
-echo "$cert" >certs/fullchain.pem
+echo "$cert" >config/daemon/certs/fullchain.pem
 if [ $? -ne 0 ]; then
     echo "Error writing certificate to file"
     exit 1
 fi
 
-echo "$key" >certs/privkey.pem
+echo "$key" >config/daemon/certs/privkey.pem
 if [ $? -ne 0 ]; then
     echo "Error writing private key to file"
     exit 1
 fi
 
 # Verify file contents
-if [ ! -s certs/fullchain.pem ] || [ ! -s certs/privkey.pem ]; then
+if [ ! -s config/daemon/certs/fullchain.pem ] || [ ! -s config/daemon/certs/privkey.pem ]; then
     echo "Warning: Generated files are empty"
     exit 1
 fi
 
 echo "Certificates extracted for $SUBDOMAIN:"
-echo "- Full chain certificate: certs/fullchain.pem"
-echo "- Private key: certs/privkey.pem"
+echo "- Full chain certificate: config/daemon/certs/fullchain.pem"
+echo "- Private key: config/daemon/certs/privkey.pem"
 
 # Optional: display file sizes
-ls -l certs/
+ls -l config/daemon/certs/
