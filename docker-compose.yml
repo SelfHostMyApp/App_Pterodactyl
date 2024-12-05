@@ -102,8 +102,8 @@ services:
       - "traefik.http.routers.pterodactyl.rule=Host(`${PTERODACTYL_SUBDOMAIN}.${ROOT_DOMAIN}`)"
       - "traefik.http.routers.pterodactyl.entrypoints=web"
       - "traefik.http.routers.pterodactyl.service=pterodactyl"
-      # - "traefik.http.routers.pterodactyl.tls=false"
-      # - "traefik.http.routers.pterodactyl.tls.certresolver=sslresolver"
+      - "traefik.http.routers.pterodactyl.tls=true"
+      - "traefik.http.routers.pterodactyl.tls.certresolver=sslresolver"
       - "traefik.http.services.pterodactyl.loadbalancer.server.port=80"
     depends_on:
       - maria-db
@@ -136,8 +136,8 @@ services:
       - "traefik.http.routers.pterodactylwings.rule=Host(`daemon.${PTERODACTYL_SUBDOMAIN}.${ROOT_DOMAIN}`)"
       - "traefik.http.routers.pterodactylwings.entrypoints=web"
       - "traefik.http.routers.pterodactylwings.service=pterodactylwings"
-      # - "traefik.http.routers.pterodactylwings.tls=false"
-      # - "traefik.http.routers.pterodactylwings.tls.certresolver=sslresolver"
+      - "traefik.http.routers.pterodactylwings.tls=true"
+      - "traefik.http.routers.pterodactylwings.tls.certresolver=sslresolver"
       - "traefik.http.services.pterodactylwings.loadbalancer.server.port=8080"
     ports:
       - "8080:8080"
