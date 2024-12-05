@@ -131,6 +131,9 @@ services:
       WINGS_GID: 988
       WINGS_USERNAME: pterodactyl
     tty: true
+    ports:
+      - "8080"
+      - "2022"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.pterodactylwings.rule=Host(`daemon.${PTERODACTYL_SUBDOMAIN}.${ROOT_DOMAIN}`)"
@@ -141,11 +144,8 @@ services:
       - "traefik.http.routers.pterodactylwingssftp.service=pterodactylwingssftp"
       - "traefik.http.routers.pterodactylwings.tls=true"
       - "traefik.http.routers.pterodactylwings.tls.certresolver=sslresolver"
-      - "traefik.http.services.pterodactylwings.loadbalancer.server.port=8081"
-      - "traefik.http.services.pterodactylwingssftp.loadbalancer.server.port=2023"
-    ports:
-      - "8080:8081"
-      - "2022:2023"
+      - "traefik.http.services.pterodactylwings.loadbalancer.server.port=8080"
+      - "traefik.http.services.pterodactylwingssftp.loadbalancer.server.port=2022"
     networks:
       pterodactyl_nw:
         ipv4_address: 172.21.0.3
