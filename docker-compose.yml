@@ -134,11 +134,15 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.pterodactylwings.rule=Host(`daemon.${PTERODACTYL_SUBDOMAIN}.${ROOT_DOMAIN}`)"
-      - "traefik.http.routers.pterodactylwings.entrypoints=websecure"
+      - "traefik.http.routers.pterodactylwings.entrypoints=websecure,pterodactyl-wings-daemon"
+      - "traefik.http.routers.pterodactylwingssftp.rule=Host(`daemon.${PTERODACTYL_SUBDOMAIN}.${ROOT_DOMAIN}`)"
+      - "traefik.http.routers.pterodactylwingssftp.entrypoints=pterodactyl-wings-sftp"
       - "traefik.http.routers.pterodactylwings.service=pterodactylwings"
+      - "traefik.http.routers.pterodactylwingssftp.service=pterodactylwingssftp"
       - "traefik.http.routers.pterodactylwings.tls=true"
       - "traefik.http.routers.pterodactylwings.tls.certresolver=sslresolver"
       - "traefik.http.services.pterodactylwings.loadbalancer.server.port=8080"
+      - "traefik.http.services.pterodactylwingssftp.loadbalancer.server.port=2022"
     ports:
       - "8080:8080"
       - "2022:2022"
