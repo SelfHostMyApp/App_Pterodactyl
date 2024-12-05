@@ -143,9 +143,6 @@ services:
       - "traefik.http.routers.pterodactylwings.tls.certresolver=sslresolver"
       - "traefik.http.services.pterodactylwings.loadbalancer.server.port=8080"
       - "traefik.http.services.pterodactylwingssftp.loadbalancer.server.port=2022"
-    ports:
-      - "8080:8080"
-      - "2022:2022"
     networks:
       pterodactyl_nw:
         ipv4_address: 172.21.0.3
