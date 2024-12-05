@@ -15,7 +15,7 @@ system:
   sftp:
     bind_port: 2022
 allowed_mounts: []
-remote: 'https://games.jamesonrgrieve.ca'
+remote: 'http://games.jamesonrgrieve.ca'
 # docker:
 #   network:
 #     interface: 0.0.0.0
