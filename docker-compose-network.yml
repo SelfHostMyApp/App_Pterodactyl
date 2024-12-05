@@ -41,6 +41,8 @@ services:
     ports:
       - "80:80"
       - "443:443"
+      - "8081:8081"
+      - "2023:2023"
     volumes:
       - ../certificates:/letsencrypt
       - /var/run/docker.sock:/var/run/docker.sock:ro

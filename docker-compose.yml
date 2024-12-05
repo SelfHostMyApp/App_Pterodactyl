@@ -69,8 +69,8 @@ services:
     networks:
       pterodactyl_nw:
         ipv4_address: 172.21.0.4
-        aliases:
-          - ${PTERODACTYL_SUBDOMAIN}.${ROOT_DOMAIN}
+        # aliases:
+        #   - ${PTERODACTYL_SUBDOMAIN}.${ROOT_DOMAIN}
     environment:
       - DB_HOST=maria-db
       - DB_PORT=3306
@@ -131,9 +131,6 @@ services:
       WINGS_GID: 988
       WINGS_USERNAME: pterodactyl
     tty: true
-    ports:
-      - "8080"
-      - "2022"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.pterodactylwings.rule=Host(`daemon.${PTERODACTYL_SUBDOMAIN}.${ROOT_DOMAIN}`)"
@@ -149,8 +146,8 @@ services:
     networks:
       pterodactyl_nw:
         ipv4_address: 172.21.0.3
-        aliases:
-          - daemon.${PTERODACTYL_SUBDOMAIN}.${ROOT_DOMAIN}
+        # aliases:
+        #   - daemon.${PTERODACTYL_SUBDOMAIN}.${ROOT_DOMAIN}
 
 networks:
   pterodactyl_nw:
