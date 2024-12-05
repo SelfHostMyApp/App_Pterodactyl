@@ -31,6 +31,7 @@ services:
       - "--entrypoints.websecure.address=:443"
       - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
       - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
+      - "--entrypoints.wss.address=:8081"
       - "--entrypoints.pterodactyl-wings-daemon.address=:8081"
       - "--entrypoints.pterodactyl-wings-sftp.address=:2023"
       - "--certificatesresolvers.sslresolver.acme.tlschallenge=true"
