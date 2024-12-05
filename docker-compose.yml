@@ -77,7 +77,7 @@ services:
       - DB_USERNAME=pterodactyl
       - DB_PASSWORD=${PTERODACTYL_PASSWORD}
       - DB_DATABASE=pterodactyl
-      - APP_URL=http://${PTERODACTYL_SUBDOMAIN}.${ROOT_DOMAIN}
+      - APP_URL=https://${PTERODACTYL_SUBDOMAIN}.${ROOT_DOMAIN}
       - APP_KEY=base64:ApE2v9xK5J6c0ugQ/bmY/wWbpZgMWGh2cppE53iLxvQ=
       - APP_TIMEZONE=${TZ}
       - CACHE_DRIVER=redis
