@@ -6,7 +6,7 @@ api:
   host: 0.0.0.0
   port: 8080
   ssl:
-    enabled: true
+    enabled: false
     cert: /etc/letsencrypt/live/daemon.games.jamesonrgrieve.ca/fullchain.pem
     key: /etc/letsencrypt/live/daemon.games.jamesonrgrieve.ca/privkey.pem
   upload_limit: 100
