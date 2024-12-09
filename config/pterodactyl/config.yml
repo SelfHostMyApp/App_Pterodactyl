@@ -7,15 +7,15 @@ api:
   port: 8080
   ssl:
     enabled: false
-    cert: /etc/letsencrypt/live/daemon.games.jamesonrgrieve.ca/fullchain.pem
-    key: /etc/letsencrypt/live/daemon.games.jamesonrgrieve.ca/privkey.pem
+    cert: /etc/letsencrypt/live/daemon.games.bodenresearch.com/fullchain.pem
+    key: /etc/letsencrypt/live/daemon.games.bodenresearch.com/privkey.pem
   upload_limit: 100
 system:
   data: /var/lib/pterodactyl/volumes
   sftp:
     bind_port: 2022
 allowed_mounts: []
-remote: 'https://games.jamesonrgrieve.ca'
+remote: 'https://games.bodenresearch.com'
 # docker:
 #   network:
 #     interface: 0.0.0.0
